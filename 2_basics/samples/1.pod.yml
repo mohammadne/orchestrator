@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helloworld-pod
+  labels:
+    app: helloworld
+spec:
+  containers:
+    - name: helloworld-container
+      image: wardviaene/k8s-demo
+      ports:
+        - containerPort: 3000
