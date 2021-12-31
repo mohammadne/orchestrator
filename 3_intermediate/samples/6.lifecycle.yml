@@ -13,7 +13,7 @@ spec:
         app: lifecycle
     spec:
       initContainers:
-        - name: init
+        - name: init-container
           image: busybox
           command: ["sh", "-c", "sleep 10"]
 
