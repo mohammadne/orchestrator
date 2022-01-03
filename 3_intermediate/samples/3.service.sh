@@ -1,3 +1,7 @@
+# kubectl
+kubectl expose deployment wordpress-deployment --port=31001 --type=NodePort
+
+# yaml manifest
 kubectl create -f 3.service.yml 
 
 kubectl get svc
