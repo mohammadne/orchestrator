@@ -19,3 +19,12 @@ spec:
         requests:
           memory: 160Mi
           cpu: 60m
+
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+
+  volumes:
+    - name: config-volume
+      configMap:
+        name: app-config

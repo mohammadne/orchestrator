@@ -19,3 +19,10 @@ spec:
         requests:
           memory: 160Mi
           cpu: 60m
+
+      env:
+        - name: DRIVER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: driver
