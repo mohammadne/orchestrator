@@ -9,7 +9,8 @@ spec:
     - name: nginx
       image: nginx:1.11
       ports:
-        - containerPort: 80
+        - name: nginx-port
+          containerPort: 80
 
       volumeMounts:
         - name: config-volume
@@ -35,7 +36,8 @@ metadata:
   name: helloworld-nginx-service
 spec:
   ports:
-    - port: 80
+    - port: 31001
+      targetPort: nginx-port
       protocol: TCP
   selector:
     app: helloworld-nginx
