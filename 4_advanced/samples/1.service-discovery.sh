@@ -22,8 +22,9 @@ kubectl run -i --tty ubuntu --image=ubuntu --restart=Never -- sh
 # Address:        10.152.0.10#kube-dns.kube-system.svc.cluster.local
 
 #! show dns-server or nameserver (option 3)
-kubectl describe svc kube-dns -n kube-system
-# look at IP of the kube-dns service, the Endpoints are refer to kube-dns pods
+kubectl get service -n kube-system kube-dns
+# NAME       TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)         AGE
+# kube-dns   ClusterIP   10.152.0.10   <none>        53/UDP,53/TCP   15d
 
 ############################################################? demo
 

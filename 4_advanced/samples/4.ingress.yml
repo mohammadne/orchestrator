@@ -1,0 +1,197 @@
+############################################################### ? INGRESS
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: helloworld-rules
+  annotations:
+    kubernetes.io/ingress.class: k8s.io/ingress-nginx
+spec:
+  rules:
+    - host: helloworld-v1-personal.apps.private.okd4.teh-1.snappcloud.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: helloworld-v1
+                port:
+                  number: 80
+    - host: helloworld-v2-personal.apps.private.okd4.teh-1.snappcloud.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: helloworld-v2
+                port:
+                  number: 80
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-ingress-controller
+  labels:
+    k8s-app: nginx-ingress-lb
+spec:
+  replicas: 1
+  selector:
+    k8s-app: nginx-ingress-lb
+  template:
+    metadata:
+      labels:
+        k8s-app: nginx-ingress-lb
+        name: nginx-ingress-lb
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - image: nginx/nginx-ingress:latest
+          name: nginx-ingress-lb
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+          # use downward API
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 80
+              hostPort: 80
+            - containerPort: 443
+              hostPort: 443
+          args:
+            - /nginx-ingress-controller
+            - --default-backend-service=$(POD_NAMESPACE)/echoheaders-default
+
+############################################################### ? ECHO
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: echoheaders
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: echoheaders
+    spec:
+      containers:
+        - name: echoheaders
+          image: gcr.io/google_containers/echoserver:1.0
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoheaders-default
+  labels:
+    app: echoheaders
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30302
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: echoheaders
+
+############################################################### ? helloworld-v1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-v1-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helloworld-v1
+  template:
+    metadata:
+      labels:
+        app: helloworld-v1
+    spec:
+      containers:
+        - name: k8s-demo
+          image: wardviaene/k8s-demo:latest
+          ports:
+            - name: nodejs-port
+              containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld-v1
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30303
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: helloworld-v1
+
+############################################################### ? helloworld-v2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-v2-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helloworld-v2
+  template:
+    metadata:
+      labels:
+        app: helloworld-v2
+    spec:
+      containers:
+        - name: k8s-demo
+          image: wardviaene/k8s-demo:2
+          ports:
+            - name: nodejs-port
+              containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld-v2
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30304
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: helloworld-v2
