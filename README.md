@@ -1,5 +1,9 @@
-# KUBERNETES
+# ORCHESTRATOR
+
+> learnings, demos and samples of kubernetes orchestrator
+>
+> feel free to contribute, creating an issue and ... .
 
 ## resources
 
-- https://github.com/wardviaene/kubernetes-course
+- [wardviaene github](https://github.com/wardviaene/kubernetes-course)
